@@ -1,0 +1,8 @@
+{
+  "name": "lexglobalbd-houston-registration",
+  "compatibility_date": "2026-09-22",
+  "assets": {
+    "directory": "./",
+    "html_handling": "auto-trailing-slash"
+  }
+}
