@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071a18">
+<title>LexGlobal BD × University of Houston Law Center</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --green:#0a8f55; --green2:#0fb36b; --deep:#062d27; --navy:#0b1f3a;
+  --gold:#d8b24f; --ink:#15221e; --muted:#68746e; --line:#dfe8e3; --soft:#f5f9f7;
+}
+html,body{margin:0;background:#121818;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+body{min-height:100vh}
+.app{max-width:430px;margin:0 auto;background:#eef4f1;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.35)}
+.screen{display:none;min-height:100vh}.screen.active{display:block}
+
+/* reusable logo systems */
+.uh-logo{display:flex;align-items:center;gap:9px}
+.uh-monogram{font-family:Georgia,serif;font-weight:900;font-size:34px;line-height:1;color:#e31837;text-shadow:0 1px 0 #fff}
+.uh-copy small,.lex-copy small{display:block;font-size:8px;letter-spacing:.8px;font-weight:700}
+.uh-copy b{display:block;font-size:14px;line-height:1.05}
+.uh-copy span{display:block;font-size:13px}
+.lex-logo{display:flex;align-items:center;gap:8px}
+.lex-emblem{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#103f74,#061d3e 65%);border:2px solid var(--gold);display:grid;place-items:center;color:#ffdd77;font-size:24px;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.lex-copy b{font-size:16px}.lex-copy b span{color:#d7b04e}
+
+/* landing */
+.landing{
+  position:relative;overflow:hidden;color:#fff;
+  background:
+    linear-gradient(180deg,rgba(4,62,50,.16),rgba(2,37,31,.88)),
+    radial-gradient(circle at 35% 28%,rgba(82,191,127,.32),transparent 27%),
+    linear-gradient(135deg,#0b6a55,#063e34 55%,#052f29);
+}
+.landing:before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,transparent 49.8%,rgba(255,255,255,.05) 50%,transparent 50.2%),
+    linear-gradient(0deg,transparent 49.8%,rgba(255,255,255,.03) 50%,transparent 50.2%);
+  background-size:34px 34px;opacity:.35
+}
+.landing:after{
+  content:"";position:absolute;left:-12%;right:-12%;bottom:-4%;height:38%;
+  background:
+    radial-gradient(circle at 16% 80%,rgba(255,255,255,.13),transparent 32%),
+    radial-gradient(circle at 74% 90%,rgba(255,255,255,.08),transparent 26%);
+}
+.landing-inner{position:relative;z-index:2;padding:18px 14px 22px;min-height:100vh;display:flex;flex-direction:column}
+.brand-band{display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.94);color:#17231f;border-radius:0 0 20px 20px;margin:-18px -14px 10px;padding:16px 12px 14px}
+.brand-divider{width:1px;height:52px;background:#c9d0cc}.brand-x{font-size:22px;color:#555}
+.hero-visual{
+  height:170px;border-radius:18px;margin-top:8px;position:relative;overflow:hidden;
+  background:
+    linear-gradient(0deg,rgba(2,46,38,.6),rgba(2,46,38,.15)),
+    radial-gradient(circle at 78% 65%,rgba(255,255,255,.12),transparent 22%),
+    linear-gradient(135deg,#3b7253 0 36%,#224d37 36% 45%,#4c765a 45% 62%,#194e39 62%);
+}
+.hero-visual:before{
+  content:"";position:absolute;left:8px;bottom:0;width:160px;height:110px;
+  background:
+    linear-gradient(#e9eee9 0 0) 0 20px/100% 8px no-repeat,
+    linear-gradient(#e9eee9 0 0) 14px 36px/132px 74px no-repeat,
+    repeating-linear-gradient(90deg,#f0f2ef 0 14px,#9aa6a0 14px 18px) 16px 42px/128px 62px no-repeat;
+  border-radius:4px 4px 0 0;opacity:.95
+}
+.hero-visual:after{
+  content:"";position:absolute;right:20px;bottom:8px;width:90px;height:90px;border-radius:50% 50% 45% 45%;
+  background:linear-gradient(160deg,#f1f1f1 0 48%,#d8d8d8 48% 52%,#f1f1f1 52%);clip-path:polygon(50% 0,60% 36%,85% 100%,15% 100%,40% 36%);
+  opacity:.9
+}
+.hero-kicker{display:inline-block;margin:12px auto 8px;padding:7px 13px;border-radius:999px;background:#0e6b55;border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:700;text-align:center}
+.hero-title{font-size:35px;line-height:.98;letter-spacing:-1.2px;text-align:center;margin:4px 0 8px;font-weight:900}
+.hero-title span{color:#ffe09a}.hero-sub{text-align:center;font-size:14px;font-weight:700;margin:4px 0}.hero-topics{text-align:center;font-size:11px;opacity:.92;margin:8px 0 14px}
+.event-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.event-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:11px;text-align:center;font-size:11px}.event-card:last-child{grid-column:1/-1}.event-card b{display:block;font-size:12px}.event-card small{display:block;opacity:.72;margin-top:2px}
+.support-brand{display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:11px;margin:11px 0;background:rgba(0,0,0,.15)}
+.support-brand .lex-emblem{width:42px;height:42px;font-size:22px}
+.btn{appearance:none;border:0;border-radius:10px;padding:13px 16px;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn-primary{color:white;background:linear-gradient(180deg,#17b56b,#0a9255);box-shadow:0 4px 13px rgba(6,128,76,.25)}
+.btn-secondary{background:#edf2ef;color:#183128}.btn-full{width:100%}
+.motto{text-align:center;font-size:9px;letter-spacing:2px;opacity:.72;margin-top:12px}
+
+/* wizard pages */
+.page{padding:10px;background:#edf3f0}
+.card{background:white;border-radius:20px;padding:14px;min-height:calc(100vh - 20px);box-shadow:0 6px 24px rgba(21,59,45,.09)}
+.top-logo{display:flex;justify-content:center;align-items:center;gap:7px;padding:4px 0 8px}
+.top-logo .lex-emblem{width:40px;height:40px;font-size:21px}.top-logo .lex-copy small{font-size:7px}
+.progress{display:flex;align-items:flex-start;margin:5px 0 18px;overflow:hidden}
+.step{width:54px;text-align:center;color:#9aa4a0;flex:none}.step b{width:24px;height:24px;border-radius:50%;background:#e2e7e4;display:grid;place-items:center;margin:auto;font-size:11px}.step span{display:block;font-size:9px;margin-top:3px}
+.step.active,.step.done{color:#0a8f55}.step.active b,.step.done b{background:#0caf64;color:white}
+.progress i{flex:1;height:2px;background:#e0e6e3;margin-top:11px}.progress i.done{background:#0caf64}
+h2{font-size:22px;margin:4px 0 4px}.muted{font-size:12px;color:var(--muted);margin:0 0 14px}
+.form{display:grid;gap:10px}.form label{font-size:12px;font-weight:700}.form input,.form select{width:100%;margin-top:4px;border:1px solid #d7dfdb;border-radius:8px;background:#fbfcfb;padding:10px;font:inherit}
+.form input:focus,.form select:focus{outline:2px solid #b8e3ca;border-color:#7dcca3}
+fieldset{border:0;padding:0;margin:0}legend{font-size:12px;font-weight:700;margin-bottom:7px}.inline{font-weight:500!important;margin-right:10px;display:inline-flex;align-items:center;gap:4px}.inline input{width:auto;margin:0}
+.actions{display:flex;gap:8px;margin-top:16px}.actions .btn{flex:1}
+.support-list{background:#edf9f2;border:1px solid #d5eee0;border-radius:11px;padding:13px;display:grid;gap:8px;font-size:12px}.support-list div{font-weight:700}
+.notice{margin-top:12px;background:#eaf4ff;border:1px solid #cfe5fb;border-radius:10px;padding:11px;font-size:11px;line-height:1.45}
+.offer{background:#eef9f3;border:1px solid #d7eee1;border-radius:12px;padding:13px;display:grid;gap:6px}.offer s{color:#7b8580}.offer strong{font-size:17px}.offer em{font-style:normal;color:#0a9858;font-size:21px}.promo{font-size:12px}.promo b{background:#d9f0e2;padding:5px 7px;border-radius:7px}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pay-card{border:1px solid #d9e0dc;background:white;border-radius:9px;padding:14px 8px;font-weight:800;cursor:pointer}.pay-card.active{border:2px solid #0caf64;background:#f0fbf5}
+.pay-detail{margin-top:11px;border:1px solid #dce4df;border-radius:10px;padding:12px;background:#fcfdfc;font-size:12px}.kv{display:grid;grid-template-columns:106px 1fr;gap:5px 8px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{font-weight:500!important;display:flex;gap:7px;align-items:flex-start}.check input{width:auto;margin-top:2px}
+.center{text-align:center}.spinner{width:64px;height:64px;border:6px solid #dcefe5;border-top-color:#0caf64;border-radius:50%;margin:80px auto 16px;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.process-list{display:grid;gap:8px;text-align:left;background:#eef9f3;padding:13px;border-radius:10px;margin:16px auto;max-width:320px}
+.success-icon{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:#dff6e8;color:#0a8f55;font-size:44px;font-weight:900;margin:70px auto 14px}
+.regid{display:inline-block;background:#0b4638;color:white;border-radius:999px;padding:8px 14px;font-weight:800;margin:6px 0 10px}
+.community{background:#053b2f;color:#fff;padding:18px;display:flex;align-items:center;justify-content:center}.community-box{width:100%;text-align:center}.wa{width:76px;height:76px;border-radius:50%;background:#18b663;border:5px solid #fff;display:grid;place-items:center;font-size:38px;margin:0 auto 15px}.community-card{background:#fff;color:#163129;border-radius:14px;padding:14px;text-align:left;margin-top:14px}.community-card .btn{width:100%;margin:10px 0}.community-card ul{padding-left:20px;line-height:1.7;font-size:12px}.script{font-family:Georgia,serif;font-style:italic;color:#f1d290;margin-top:24px}
+
+/* make first page 1 screen only */
+.landing .btn-primary{margin-top:10px}
+@media(max-height:760px){.hero-visual{height:128px}.hero-title{font-size:31px}.hero-kicker{margin-top:8px}.event-card{padding:8px}.landing-inner{padding-bottom:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="screen-landing" class="screen landing active">
+  <div class="landing-inner">
+    <div class="brand-band">
+      <div class="uh-logo">
+        <div class="uh-monogram">UH</div>
+        <div class="uh-copy"><small>PROGRAM BY</small><b>UNIVERSITY OF<br>HOUSTON</b><span>LAW CENTER</span></div>
+      </div>
+      <div class="brand-divider"></div>
+      <div class="brand-x">×</div>
+      <div class="lex-logo">
+        <div class="lex-emblem">⚖</div>
+        <div class="lex-copy"><small>BANGLADESH PARTICIPANT SUPPORT</small><b>Lex<span>Global</span> BD</b></div>
+      </div>
+    </div>
+
+    <div class="hero-visual"></div>
+    <div class="hero-kicker">আইন ও AI-এর ভবিষ্যৎ জানুন, বিশ্বমানের আলোচনায় যুক্ত হোন</div>
+    <div class="hero-title">AI, Law, and the <span>Legal Profession</span></div>
+    <div class="hero-sub">A virtual program by University of Houston Law Center</div>
+    <div class="hero-topics">AI in Legal Education • Responsible Legal Practice • AI in Courts</div>
+
+    <div class="event-row">
+      <div class="event-card">📅 <b>7 October 2026</b></div>
+      <div class="event-card">🕚 <b>11:00 PM – 2:00 AM</b><small>Bangladesh Time</small></div>
+      <div class="event-card">🎥 <b>Zoom (Online)</b></div>
+    </div>
+
+    <div class="support-brand">
+      <div class="lex-emblem">⚖</div>
+      <div class="lex-copy"><small>BANGLADESH PARTICIPANT SUPPORT</small><b>Lex<span>Global</span> BD ✓</b></div>
+    </div>
+
+    <button class="btn btn-primary btn-full" data-next="details">Start Registration →</button>
+    <div class="motto">LAW • TECHNOLOGY • PEOPLE<br>A MORE JUST BANGLADESH</div>
+  </div>
+</section>
+
+<section id="screen-details" class="screen page">
+  <div class="card">
+    <div class="top-logo"><div class="lex-emblem">⚖</div><div class="lex-copy"><b>Lex<span>Global</span> BD ✓</b><small>দালালমুক্ত আইন গড়া আমাদের লক্ষ্য</small></div></div>
+    <div class="progress">
+      <div class="step active"><b>1</b><span>Details</span></div><i></i>
+      <div class="step"><b>2</b><span>Support</span></div><i></i>
+      <div class="step"><b>3</b><span>Payment</span></div><i></i>
+      <div class="step"><b>4</b><span>Verify</span></div><i></i>
+      <div class="step"><b>5</b><span>Complete</span></div>
+    </div>
+    <h2>Participant Information</h2><p class="muted">Please provide your information to continue.</p>
+    <form id="detailsForm" class="form">
+      <label>Full Name *<input required placeholder="Enter your full name"></label>
+      <label>Email Address *<input required type="email" placeholder="Enter your email address"></label>
+      <label>Mobile Number *<input required placeholder="01XXXXXXXXX"></label>
+      <label>WhatsApp Number *<input required placeholder="01XXXXXXXXX"></label>
+      <label>Profession *<select required><option value="">Select your profession</option><option>Lawyer / Advocate</option><option>Law Student</option><option>University Student</option><option>Teacher / Researcher</option><option>AI / Technology Professional</option><option>Corporate Professional</option><option>Other</option></select></label>
+      <label>Institution / Organization<input placeholder="Institution or organization"></label>
+      <label>District *<select required><option value="">Select your district</option><option>Dhaka</option><option>Rajshahi</option><option>Chattogram</option><option>Khulna</option><option>Sylhet</option><option>Rangpur</option><option>Mymensingh</option><option>Barishal</option><option>Other</option></select></label>
+      <label>Country *<select required><option>Bangladesh</option></select></label>
+      <label>Facebook Profile Link (Optional)<input placeholder="https://facebook.com/..."></label>
+      <fieldset><legend>Preferred Communication Method *</legend>
+        <label class="inline"><input type="radio" name="contact" checked> WhatsApp</label>
+        <label class="inline"><input type="radio" name="contact"> Email</label>
+        <label class="inline"><input type="radio" name="contact"> Messenger</label>
+      </fieldset>
+      <button class="btn btn-primary btn-full" type="submit">Continue →</button>
+    </form>
+  </div>
+</section>
+
+<section id="screen-support" class="screen page">
+  <div class="card">
+    <div class="top-logo"><div class="lex-emblem">⚖</div><div class="lex-copy"><b>Lex<span>Global</span> BD ✓</b><small>দালালমুক্ত আইন গড়া আমাদের লক্ষ্য</small></div></div>
+    <div class="progress">
+      <div class="step done"><b>1</b><span>Details</span></div><i class="done"></i>
+      <div class="step active"><b>2</b><span>Support</span></div><i></i>
+      <div class="step"><b>3</b><span>Payment</span></div><i></i>
+      <div class="step"><b>4</b><span>Verify</span></div><i></i>
+      <div class="step"><b>5</b><span>Complete</span></div>
+    </div>
+    <h2>LexGlobal BD Support</h2><p class="muted">Your registration is supported by LexGlobal BD.</p>
+    <div class="support-list">
+      <div>✓ সম্পূর্ণ Registration Guidance</div><div>✓ Participant Information Verification</div><div>✓ Program-related গুরুত্বপূর্ণ Update</div>
+      <div>✓ Bangladesh Time অনুযায়ী Event Reminder</div><div>✓ Zoom Joining Guidance</div><div>✓ Joining Link Support</div>
+      <div>✓ Program Preparation Information</div><div>✓ Registration / Joining-related Support</div><div>✓ প্রয়োজনীয় Participant Assistance</div><div>✓ Certificate-related Guidance</div>
+    </div>
+    <div class="notice">এই ফি শুধুমাত্র <b>LexGlobal BD Registration Assistance & Participant Support</b> সেবার জন্য। এটি University of Houston Law Center-এর মূল registration fee নয়।</div>
+    <div class="actions"><button class="btn btn-secondary" data-next="details">← Back</button><button class="btn btn-primary" data-next="payment">Continue to Payment →</button></div>
+  </div>
+</section>
+
+<section id="screen-payment" class="screen page">
+  <div class="card">
+    <div class="top-logo"><div class="lex-emblem">⚖</div><div class="lex-copy"><b>Lex<span>Global</span> BD ✓</b><small>দালালমুক্ত আইন গড়া আমাদের লক্ষ্য</small></div></div>
+    <div class="progress">
+      <div class="step done"><b>1</b><span>Details</span></div><i class="done"></i>
+      <div class="step done"><b>2</b><span>Support</span></div><i class="done"></i>
+      <div class="step active"><b>3</b><span>Payment</span></div><i></i>
+      <div class="step"><b>4</b><span>Verify</span></div><i></i>
+      <div class="step"><b>5</b><span>Complete</span></div>
+    </div>
+    <h2>Payment</h2><p class="muted">Complete the payment to continue your registration.</p>
+    <div class="offer"><div><span>Regular Fee: <s>৳499</s></span><strong>Special Offer Fee: <em>৳299</em></strong></div><div class="promo">Promo Code: <b>lexbdhouston</b></div><small>Offer valid till 27 September 2026.</small></div>
+    <h3>Select Payment Method *</h3>
+    <div class="pay-grid">
+      <button class="pay-card active" data-method="bKash">bKash</button><button class="pay-card" data-method="Nagad">Nagad</button>
+      <button class="pay-card" data-method="Bank Transfer">🏦 Bank Transfer</button><button class="pay-card" data-method="Redot Pay">🔴 Redot Pay</button>
+    </div>
+    <div id="payDetail" class="pay-detail"></div>
+    <div class="actions"><button class="btn btn-secondary" data-next="support">← Back</button><button class="btn btn-primary" data-next="verify">I Have Paid →</button></div>
+  </div>
+</section>
+
+<section id="screen-verify" class="screen page">
+  <div class="card">
+    <div class="top-logo"><div class="lex-emblem">⚖</div><div class="lex-copy"><b>Lex<span>Global</span> BD ✓</b><small>দালালমুক্ত আইন গড়া আমাদের লক্ষ্য</small></div></div>
+    <div class="progress">
+      <div class="step done"><b>1</b><span>Details</span></div><i class="done"></i>
+      <div class="step done"><b>2</b><span>Support</span></div><i class="done"></i>
+      <div class="step done"><b>3</b><span>Payment</span></div><i class="done"></i>
+      <div class="step active"><b>4</b><span>Verify</span></div><i></i>
+      <div class="step"><b>5</b><span>Complete</span></div>
+    </div>
+    <h2>Payment Information</h2><p class="muted">Please provide your payment details.</p>
+    <form id="verifyForm" class="form">
+      <label>Payment Method<input id="methodField" value="bKash" readonly></label>
+      <label>Transaction ID / Payment Reference *<input required placeholder="Enter transaction ID / reference"></label>
+      <label id="payMobile">Payment Mobile Number *<input required placeholder="Number used for payment"></label>
+      <label>Amount Paid *<input id="amountField" value="299" required></label>
+      <div class="two-col"><label>Payment Date *<input type="date" required></label><label>Payment Time *<input type="time" required></label></div>
+      <label>Payment Screenshot / Receipt (Optional)<input type="file" accept="image/*,.pdf"></label>
+      <label class="check"><input type="checkbox" required> I confirm that the payment information provided above is correct.</label>
+      <div class="actions"><button type="button" class="btn btn-secondary" data-next="payment">← Back</button><button class="btn btn-primary" type="submit">Submit Registration</button></div>
+    </form>
+  </div>
+</section>
+
+<section id="screen-processing" class="screen page">
+  <div class="card center">
+    <div class="top-logo"><div class="lex-emblem">⚖</div><div class="lex-copy"><b>Lex<span>Global</span> BD ✓</b><small>দালালমুক্ত আইন গড়া আমাদের লক্ষ্য</small></div></div>
+    <div class="spinner"></div>
+    <h2>Submitting Your Registration</h2><p class="muted">Please wait while we confirm your information.</p>
+    <div class="process-list"><div>✓ Saving your details...</div><div>✓ Verifying payment information...</div><div>✓ Finalizing your registration...</div></div>
+    <div class="notice">This may take a few seconds. Please do not close this page.</div>
+  </div>
+</section>
+
+<section id="screen-complete" class="screen page">
+  <div class="card center">
+    <div class="top-logo"><div class="lex-emblem">⚖</div><div class="lex-copy"><b>Lex<span>Global</span> BD ✓</b><small>দালালমুক্ত আইন গড়া আমাদের লক্ষ্য</small></div></div>
+    <div class="success-icon">✓</div>
+    <h2>Registration Submitted Successfully!</h2><p>Thank you for registering through LexGlobal BD.</p>
+    <p class="muted">Your registration and payment information has been successfully submitted. LexGlobal BD will verify your payment and confirm your participation.</p>
+    <div class="regid">LGUH-PREVIEW01</div>
+    <div class="notice">You will receive updates, joining instructions and important information through our WhatsApp Community.</div>
+    <button class="btn btn-primary btn-full" data-next="community">Join the WhatsApp Community</button>
+  </div>
+</section>
+
+<section id="screen-community" class="screen community">
+  <div class="community-box">
+    <div class="wa">☏</div>
+    <h2>Join Our WhatsApp Community</h2>
+    <p>Get all program updates, reminders, joining instructions and support from LexGlobal BD.</p>
+    <div class="community-card">
+      <b>LexGlobal BD – UH Program Community</b>
+      <a class="btn btn-primary" href="https://chat.whatsapp.com/HaNnQfi3PbZ0zgtFDhwXe4" target="_blank">Join Community ↗</a>
+      <ul><li>Program updates</li><li>Important announcements</li><li>Joining guidance</li><li>Dedicated support</li></ul>
+    </div>
+    <div class="script">See you in the community!<br><b>LexGlobal BD</b></div>
+  </div>
+</section>
+
+</div>
+<script>
+function show(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+document.addEventListener('click',e=>{
+  const n=e.target.closest('[data-next]');
+  if(n){e.preventDefault();show(n.dataset.next)}
+});
+document.getElementById('detailsForm').addEventListener('submit',e=>{e.preventDefault();if(e.target.reportValidity())show('support')});
+let method='bKash';
+function renderPay(){
+  const d=document.getElementById('payDetail');
+  const mf=document.getElementById('methodField');
+  const pm=document.getElementById('payMobile');
+  const af=document.getElementById('amountField');
+  mf.value=method;
+  document.querySelectorAll('.pay-card').forEach(b=>b.classList.toggle('active',b.dataset.method===method));
+  if(method==='bKash'){d.innerHTML='<b>bKash Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01885603359</b><span>Amount</span><b>৳299</b></div>';pm.style.display='block';af.value='299'}
+  if(method==='Nagad'){d.innerHTML='<b>Nagad Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01303498506</b><span>Amount</span><b>৳299</b></div>';pm.style.display='block';af.value='299'}
+  if(method==='Bank Transfer'){d.innerHTML='<b>Bank Transfer Details</b><div class="kv"><span>Bank Name</span><b>BRAC Bank PLC</b><span>Account Name</span><b>MD. NAHID ALOM</b><span>Account Number</span><b>1073658180001</b><span>Branch</span><b>RAJSHAHI BRANCH</b><span>Routing Number</span><b>060811934</b><span>SWIFT Code</span><b>BRAKBDDH</b><span>Amount</span><b>৳299</b></div>';pm.style.display='none';af.value='299'}
+  if(method==='Redot Pay'){d.innerHTML='<b>Redot Pay Details</b><div class="kv"><span>Pay ID</span><b>1164960686</b><span>Amount</span><b>USD 2.50</b></div>';pm.style.display='none';af.value='2.50'}
+}
+document.querySelectorAll('.pay-card').forEach(b=>b.addEventListener('click',()=>{method=b.dataset.method;renderPay()}));
+renderPay();
+document.getElementById('verifyForm').addEventListener('submit',async e=>{e.preventDefault();if(!e.target.reportValidity())return;show('processing');await new Promise(r=>setTimeout(r,1000));show('complete')});
+</script>
+</body>
+</html>
