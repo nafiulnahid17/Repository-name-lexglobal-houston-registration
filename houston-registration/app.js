@@ -4,99 +4,158 @@ const sb=configured?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_A
 
 let selectedMethod="bKash";
 let participantData={};
-let activeRegistrationId="";
 const OFFER_END=new Date("2026-09-27T23:59:59+06:00");
 const REG_END=new Date("2026-10-04T23:59:59+06:00");
 
 function currentFee(){return new Date()<=OFFER_END?299:499}
 function registrationOpen(){return new Date()<=REG_END}
+
 function show(name){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById("screen-"+name)?.classList.add("active");
+  const target=document.getElementById("screen-"+name);
+  if(target)target.classList.add("active");
   window.scrollTo({top:0,behavior:"instant"});
 }
-function makeRegistrationId(){
-  const d=new Date(),y=String(d.getFullYear()).slice(-2),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
-  return `LGUH-${y}${m}${day}-${Math.floor(10000+Math.random()*90000)}`;
+
+async function loadHomeBackground(){
+  try{
+    const parts=await Promise.all([0,1,2].map(i=>
+      fetch("./assets/home-bg-v2/part"+String(i).padStart(2,"0")+".txt",{cache:"force-cache"}).then(r=>{
+        if(!r.ok)throw new Error("Background asset failed");
+        return r.text();
+      })
+    ));
+    const uri='url("data:image/webp;base64,'+parts.join("").trim()+'")';
+    document.documentElement.style.setProperty("--houston-bg",uri);
+  }catch(err){console.warn("Houston background could not be loaded",err)}
 }
+
+function makeRegistrationId(){
+  const d=new Date();
+  const y=String(d.getFullYear()).slice(-2);
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return "LGUH-"+y+m+day+"-"+Math.floor(10000+Math.random()*90000);
+}
+
 function setDateTimeDefaults(){
   const n=new Date();
-  const date=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
-  const time=`${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`;
+  const date=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
+  const time=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");
   const d=document.getElementById("payment-date"),t=document.getElementById("payment-time");
-  if(d&&!d.value)d.value=date;if(t&&!t.value)t.value=time;
+  if(d&&!d.value)d.value=date;
+  if(t&&!t.value)t.value=time;
 }
+
 function applyCampaignState(){
   const fee=currentFee();
   document.getElementById("offerFee").textContent="৳"+fee;
   document.getElementById("programFee").textContent="৳"+fee;
   if(!registrationOpen()){
-    ["landingStart","programStart","submitRegistration"].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=true;b.textContent="Registration Closed";b.style.opacity=".65"}});
+    ["landingStart","programStart","submitRegistration"].forEach(id=>{
+      const b=document.getElementById(id);
+      if(b){b.disabled=true;b.textContent="Registration Closed";}
+    });
   }
 }
-function copyButton(value){return ` <button type="button" class="copy-btn" data-copy="${value}">Copy</button>`}
+
+function copyButton(value){return ' <button type="button" class="copy-btn" data-copy="'+value+'">Copy</button>'}
+
 function renderPayment(){
   const fee=currentFee();
   document.querySelectorAll(".pay-card").forEach(b=>b.classList.toggle("active",b.dataset.method===selectedMethod));
-  const box=document.getElementById("pay-detail"),mf=document.getElementById("method-field"),mw=document.getElementById("payment-mobile-wrap"),mi=document.getElementById("payment-mobile"),amount=document.getElementById("amount-paid");
+  const box=document.getElementById("pay-detail");
+  const mf=document.getElementById("method-field");
+  const mw=document.getElementById("payment-mobile-wrap");
+  const mi=document.getElementById("payment-mobile");
+  const amount=document.getElementById("amount-paid");
   if(!box||!mf||!mw||!mi||!amount)return;
   mf.value=selectedMethod;
+
   if(selectedMethod==="bKash"){
-    box.innerHTML=`<b>bKash Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01885603359 ${copyButton("01885603359")}</b><span>Amount</span><b>৳${fee}</b></div><div class="notice">Please send the exact amount and submit the Transaction ID in the next step.</div>`;
+    box.innerHTML='<b>bKash Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01885603359 '+copyButton("01885603359")+'</b><span>Amount</span><b>৳'+fee+'</b></div><div class="notice">Please send the exact amount and provide the Transaction ID in the next step.</div>';
     mw.style.display="block";mi.required=true;amount.value=String(fee);
   }else if(selectedMethod==="Nagad"){
-    box.innerHTML=`<b>Nagad Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01303498506 ${copyButton("01303498506")}</b><span>Amount</span><b>৳${fee}</b></div><div class="notice">Please send the exact amount and submit the Transaction ID in the next step.</div>`;
+    box.innerHTML='<b>Nagad Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01303498506 '+copyButton("01303498506")+'</b><span>Amount</span><b>৳'+fee+'</b></div><div class="notice">Please send the exact amount and provide the Transaction ID in the next step.</div>';
     mw.style.display="block";mi.required=true;amount.value=String(fee);
   }else if(selectedMethod==="Bank Transfer"){
-    box.innerHTML=`<b>Bank Transfer Details</b><div class="kv"><span>Bank</span><b>BRAC Bank PLC</b><span>Account Name</span><b>MD. NAHID ALOM</b><span>Account Number</span><b>1073658180001 ${copyButton("1073658180001")}</b><span>Branch</span><b>RAJSHAHI BRANCH</b><span>Routing</span><b>060811934</b><span>SWIFT</span><b>BRAKBDDH</b><span>Amount</span><b>৳${fee}</b></div>`;
+    box.innerHTML='<b>Bank Transfer Details</b><div class="kv"><span>Bank</span><b>BRAC Bank PLC</b><span>Account Name</span><b>MD. NAHID ALOM</b><span>Account Number</span><b>1073658180001 '+copyButton("1073658180001")+'</b><span>Branch</span><b>RAJSHAHI BRANCH</b><span>Routing</span><b>060811934</b><span>SWIFT</span><b>BRAKBDDH</b><span>Amount</span><b>৳'+fee+'</b></div>';
     mw.style.display="none";mi.required=false;mi.value="";amount.value=String(fee);
   }else{
-    box.innerHTML=`<b>Redot Pay Details</b><div class="kv"><span>Pay ID</span><b>1164960686 ${copyButton("1164960686")}</b><span>Amount</span><b>USD 2.50</b></div>`;
+    box.innerHTML='<b>Redot Pay Details</b><div class="kv"><span>Pay ID</span><b>1164960686 '+copyButton("1164960686")+'</b><span>Amount</span><b>USD 2.50</b></div>';
     mw.style.display="none";mi.required=false;mi.value="";amount.value="2.50";
   }
 }
+
 document.addEventListener("click",async e=>{
   const nav=e.target.closest("[data-next]");
   if(nav){
     e.preventDefault();
-    if((nav.dataset.next==="details"||nav.dataset.next==="verify")&&!registrationOpen()){alert("Registration deadline has ended.");return}
-    if(nav.dataset.next==="verify")setDateTimeDefaults();
-    show(nav.dataset.next);return;
+    const next=nav.dataset.next;
+    if((next==="details"||next==="verify")&&!registrationOpen()){
+      alert("Registration deadline has ended.");
+      return;
+    }
+    if(next==="verify")setDateTimeDefaults();
+    show(next);
+    return;
   }
+
   const pm=e.target.closest("[data-method]");
-  if(pm){selectedMethod=pm.dataset.method;renderPayment();return}
+  if(pm){
+    selectedMethod=pm.dataset.method;
+    renderPayment();
+    return;
+  }
+
   const cp=e.target.closest("[data-copy]");
   if(cp){
-    const val=cp.dataset.copy;
-    try{await navigator.clipboard.writeText(val);const old=cp.textContent;cp.textContent="Copied";setTimeout(()=>cp.textContent=old,1000)}catch{}
+    try{
+      await navigator.clipboard.writeText(cp.dataset.copy);
+      const old=cp.textContent;cp.textContent="Copied";
+      setTimeout(()=>cp.textContent=old,1000);
+    }catch{}
   }
 });
+
 document.getElementById("participant-form")?.addEventListener("submit",e=>{
-  e.preventDefault();if(!e.target.reportValidity())return;
+  e.preventDefault();
+  if(!e.target.reportValidity())return;
   participantData=Object.fromEntries(new FormData(e.target).entries());
   show("support");
 });
+
 const receiptInput=document.getElementById("receipt");
 document.getElementById("upload-area")?.addEventListener("click",()=>receiptInput?.click());
-receiptInput?.addEventListener("change",()=>{const z=document.getElementById("upload-area");if(z&&receiptInput.files[0])z.firstChild.textContent="✓ "+receiptInput.files[0].name+" "});
+receiptInput?.addEventListener("change",()=>{
+  const z=document.getElementById("upload-area");
+  if(z&&receiptInput.files[0])z.childNodes[0].textContent="✓ "+receiptInput.files[0].name+" ";
+});
+
 document.getElementById("payment-form")?.addEventListener("submit",async e=>{
-  e.preventDefault();if(!e.target.reportValidity())return;
+  e.preventDefault();
+  if(!e.target.reportValidity())return;
   if(!registrationOpen()){alert("Registration deadline has ended.");return}
   if(!configured){alert("Database is not connected. Please check config.js.");return}
-  const btn=document.getElementById("submitRegistration");btn.disabled=true;
+
+  const btn=document.getElementById("submitRegistration");
+  btn.disabled=true;
   show("processing");
+
   try{
     const paymentData=Object.fromEntries(new FormData(e.target).entries());
     const registrationId=makeRegistrationId();
     const receipt=receiptInput?.files?.[0]||null;
     let receiptPath=null;
+
     if(receipt){
       if(receipt.size>5*1024*1024)throw new Error("Payment screenshot must be 5MB or smaller.");
       const ext=(receipt.name.split(".").pop()||"bin").toLowerCase();
-      receiptPath=`${registrationId}/${crypto.randomUUID()}.${ext}`;
+      receiptPath=registrationId+"/"+crypto.randomUUID()+"."+ext;
       const {error:upErr}=await sb.storage.from("payment-receipts").upload(receiptPath,receipt,{upsert:false});
       if(upErr)throw upErr;
     }
+
     const row={
       registration_id:registrationId,
       full_name:participantData.full_name,
@@ -127,14 +186,23 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
       payment_status:"Pending Verification",
       registration_status:"Pending Verification"
     };
+
     const {error}=await sb.from("houston_registrations").insert(row);
     if(error)throw error;
-    activeRegistrationId=registrationId;
+
     document.getElementById("registration-id").textContent=registrationId;
     await new Promise(r=>setTimeout(r,900));
     show("complete");
   }catch(err){
-    console.error(err);alert("Submission failed: "+(err?.message||"Please try again."));show("verify");
-  }finally{btn.disabled=false}
+    console.error(err);
+    alert("Submission failed: "+(err?.message||"Please try again."));
+    show("verify");
+  }finally{
+    btn.disabled=false;
+  }
 });
-applyCampaignState();renderPayment();setDateTimeDefaults();
+
+loadHomeBackground();
+applyCampaignState();
+renderPayment();
+setDateTimeDefaults();
