@@ -1,30 +1,140 @@
 const cfg=window.LEXGLOBAL_CONFIG||{};
 const configured=cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY&&!cfg.SUPABASE_URL.includes("PASTE_")&&!cfg.SUPABASE_ANON_KEY.includes("PASTE_");
 const sb=configured?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;
-let selectedMethod="bKash",participantData={};
 
-function show(n){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("screen-"+n)?.classList.add("active");window.scrollTo({top:0,behavior:"smooth"});}
-function makeRegistrationId(){const d=new Date(),y=String(d.getFullYear()).slice(-2),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0"),r=Math.floor(10000+Math.random()*90000);return `LGUH-${y}${m}${day}-${r}`;}
-function localPaymentDateTime(){const n=new Date();return{payment_date:`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`,payment_time:`${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}:${String(n.getSeconds()).padStart(2,"0")}`};}
-const payMap={
-"bKash":{title:"bKash Send Money",rows:[["Number","01885603359"],["Amount","৳299"]],mobile:true,amount:"299"},
-"Nagad":{title:"Nagad Send Money",rows:[["Number","01303498506"],["Amount","৳299"]],mobile:true,amount:"299"},
-"Bank Transfer":{title:"BRAC Bank PLC",rows:[["Account Name","MD. NAHID ALOM"],["Account Number","1073658180001"],["Branch","RAJSHAHI BRANCH"],["Routing","060811934"],["SWIFT","BRAKBDDH"],["Amount","৳299"]],mobile:false,amount:"299"},
-"Redot Pay":{title:"Redot Pay",rows:[["Pay ID","1164960686"],["Amount","USD 2.50"]],mobile:false,amount:"2.50"}
-};
-function renderPayment(){document.querySelectorAll(".pay").forEach(x=>x.classList.toggle("active",x.dataset.method===selectedMethod));const p=payMap[selectedMethod],box=document.getElementById("pay-detail");if(box)box.innerHTML=`<h3 style="margin-top:0">${p.title}</h3>${p.rows.map(([k,v])=>`<div class="row"><small>${k}</small><b>${v}</b></div>`).join("")}<div style="margin-top:10px;color:#afc4cf;font-size:12px">Send the exact amount, then submit your transaction ID in the next step.</div>`;const mf=document.getElementById("method-field"),mw=document.getElementById("payment-mobile-wrap"),mi=document.getElementById("payment-mobile"),a=document.getElementById("amount-paid");if(mf)mf.value=selectedMethod;if(mw)mw.style.display=p.mobile?"block":"none";if(mi){mi.required=p.mobile;if(!p.mobile)mi.value=""}if(a)a.value=p.amount;}
-document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g){e.preventDefault();show(g.dataset.go);return}const p=e.target.closest("[data-method]");if(p){selectedMethod=p.dataset.method;renderPayment();}});
-document.getElementById("participant-form")?.addEventListener("submit",e=>{e.preventDefault();if(!e.target.reportValidity())return;participantData=Object.fromEntries(new FormData(e.target).entries());show(4);});
-const upload=document.querySelector(".upload"),receiptInput=document.getElementById("receipt");upload?.addEventListener("click",()=>receiptInput?.click());
-document.getElementById("payment-form")?.addEventListener("submit",async e=>{
-e.preventDefault();if(!e.target.reportValidity())return;if(!configured){alert("Database is not connected. Please check config.js.");return}
-show(7);
-try{
- const paymentData=Object.fromEntries(new FormData(e.target).entries()),registrationId=makeRegistrationId(),receipt=receiptInput?.files?.[0]||null;let receiptPath=null;
- if(receipt){if(receipt.size>5*1024*1024)throw new Error("Payment screenshot must be 5MB or smaller.");const ext=(receipt.name.split(".").pop()||"bin").toLowerCase();receiptPath=`${registrationId}/${crypto.randomUUID()}.${ext}`;const{error}=await sb.storage.from("payment-receipts").upload(receiptPath,receipt,{upsert:false});if(error)throw error;}
- const t=localPaymentDateTime();
- const row={registration_id:registrationId,full_name:participantData.full_name,age:Number(participantData.age),email:participantData.email,mobile:participantData.mobile,whatsapp:participantData.whatsapp,profession:participantData.profession,institution:participantData.institution||null,present_address:participantData.present_address,district:participantData.district,division:participantData.division,country:participantData.country||"Bangladesh",facebook_url:participantData.facebook_url||null,preferred_contact:participantData.preferred_contact||"WhatsApp",interested_topic:participantData.interested_topic,join_reason:participantData.join_reason||null,referral_source:participantData.referral_source||null,payment_method:selectedMethod,transaction_id:paymentData.transaction_id,payment_mobile:paymentData.payment_mobile||null,amount_paid:Number(paymentData.amount_paid||0),currency:selectedMethod==="Redot Pay"?"USD":"BDT",payment_date:t.payment_date,payment_time:t.payment_time,receipt_path:receiptPath,promo_code:"lexbdhouston",payment_status:"Pending Verification",registration_status:"Pending Verification"};
- const{error}=await sb.from("houston_registrations").insert(row);if(error)throw error;setTimeout(()=>show(8),800);
-}catch(err){console.error(err);alert("Submission failed: "+(err?.message||"Please try again."));show(6);}
+let selectedMethod="bKash";
+let participantData={};
+let activeRegistrationId="";
+const OFFER_END=new Date("2026-09-27T23:59:59+06:00");
+const REG_END=new Date("2026-10-04T23:59:59+06:00");
+
+function currentFee(){return new Date()<=OFFER_END?299:499}
+function registrationOpen(){return new Date()<=REG_END}
+function show(name){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+name)?.classList.add("active");
+  window.scrollTo({top:0,behavior:"instant"});
+}
+function makeRegistrationId(){
+  const d=new Date(),y=String(d.getFullYear()).slice(-2),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+  return `LGUH-${y}${m}${day}-${Math.floor(10000+Math.random()*90000)}`;
+}
+function setDateTimeDefaults(){
+  const n=new Date();
+  const date=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
+  const time=`${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`;
+  const d=document.getElementById("payment-date"),t=document.getElementById("payment-time");
+  if(d&&!d.value)d.value=date;if(t&&!t.value)t.value=time;
+}
+function applyCampaignState(){
+  const fee=currentFee();
+  document.getElementById("offerFee").textContent="৳"+fee;
+  document.getElementById("programFee").textContent="৳"+fee;
+  if(!registrationOpen()){
+    ["landingStart","programStart","submitRegistration"].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=true;b.textContent="Registration Closed";b.style.opacity=".65"}});
+  }
+}
+function copyButton(value){return ` <button type="button" class="copy-btn" data-copy="${value}">Copy</button>`}
+function renderPayment(){
+  const fee=currentFee();
+  document.querySelectorAll(".pay-card").forEach(b=>b.classList.toggle("active",b.dataset.method===selectedMethod));
+  const box=document.getElementById("pay-detail"),mf=document.getElementById("method-field"),mw=document.getElementById("payment-mobile-wrap"),mi=document.getElementById("payment-mobile"),amount=document.getElementById("amount-paid");
+  if(!box||!mf||!mw||!mi||!amount)return;
+  mf.value=selectedMethod;
+  if(selectedMethod==="bKash"){
+    box.innerHTML=`<b>bKash Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01885603359 ${copyButton("01885603359")}</b><span>Amount</span><b>৳${fee}</b></div><div class="notice">Please send the exact amount and submit the Transaction ID in the next step.</div>`;
+    mw.style.display="block";mi.required=true;amount.value=String(fee);
+  }else if(selectedMethod==="Nagad"){
+    box.innerHTML=`<b>Nagad Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01303498506 ${copyButton("01303498506")}</b><span>Amount</span><b>৳${fee}</b></div><div class="notice">Please send the exact amount and submit the Transaction ID in the next step.</div>`;
+    mw.style.display="block";mi.required=true;amount.value=String(fee);
+  }else if(selectedMethod==="Bank Transfer"){
+    box.innerHTML=`<b>Bank Transfer Details</b><div class="kv"><span>Bank</span><b>BRAC Bank PLC</b><span>Account Name</span><b>MD. NAHID ALOM</b><span>Account Number</span><b>1073658180001 ${copyButton("1073658180001")}</b><span>Branch</span><b>RAJSHAHI BRANCH</b><span>Routing</span><b>060811934</b><span>SWIFT</span><b>BRAKBDDH</b><span>Amount</span><b>৳${fee}</b></div>`;
+    mw.style.display="none";mi.required=false;mi.value="";amount.value=String(fee);
+  }else{
+    box.innerHTML=`<b>Redot Pay Details</b><div class="kv"><span>Pay ID</span><b>1164960686 ${copyButton("1164960686")}</b><span>Amount</span><b>USD 2.50</b></div>`;
+    mw.style.display="none";mi.required=false;mi.value="";amount.value="2.50";
+  }
+}
+document.addEventListener("click",async e=>{
+  const nav=e.target.closest("[data-next]");
+  if(nav){
+    e.preventDefault();
+    if((nav.dataset.next==="details"||nav.dataset.next==="verify")&&!registrationOpen()){alert("Registration deadline has ended.");return}
+    if(nav.dataset.next==="verify")setDateTimeDefaults();
+    show(nav.dataset.next);return;
+  }
+  const pm=e.target.closest("[data-method]");
+  if(pm){selectedMethod=pm.dataset.method;renderPayment();return}
+  const cp=e.target.closest("[data-copy]");
+  if(cp){
+    const val=cp.dataset.copy;
+    try{await navigator.clipboard.writeText(val);const old=cp.textContent;cp.textContent="Copied";setTimeout(()=>cp.textContent=old,1000)}catch{}
+  }
 });
-renderPayment();
+document.getElementById("participant-form")?.addEventListener("submit",e=>{
+  e.preventDefault();if(!e.target.reportValidity())return;
+  participantData=Object.fromEntries(new FormData(e.target).entries());
+  show("support");
+});
+const receiptInput=document.getElementById("receipt");
+document.getElementById("upload-area")?.addEventListener("click",()=>receiptInput?.click());
+receiptInput?.addEventListener("change",()=>{const z=document.getElementById("upload-area");if(z&&receiptInput.files[0])z.firstChild.textContent="✓ "+receiptInput.files[0].name+" "});
+document.getElementById("payment-form")?.addEventListener("submit",async e=>{
+  e.preventDefault();if(!e.target.reportValidity())return;
+  if(!registrationOpen()){alert("Registration deadline has ended.");return}
+  if(!configured){alert("Database is not connected. Please check config.js.");return}
+  const btn=document.getElementById("submitRegistration");btn.disabled=true;
+  show("processing");
+  try{
+    const paymentData=Object.fromEntries(new FormData(e.target).entries());
+    const registrationId=makeRegistrationId();
+    const receipt=receiptInput?.files?.[0]||null;
+    let receiptPath=null;
+    if(receipt){
+      if(receipt.size>5*1024*1024)throw new Error("Payment screenshot must be 5MB or smaller.");
+      const ext=(receipt.name.split(".").pop()||"bin").toLowerCase();
+      receiptPath=`${registrationId}/${crypto.randomUUID()}.${ext}`;
+      const {error:upErr}=await sb.storage.from("payment-receipts").upload(receiptPath,receipt,{upsert:false});
+      if(upErr)throw upErr;
+    }
+    const row={
+      registration_id:registrationId,
+      full_name:participantData.full_name,
+      age:Number(participantData.age),
+      email:participantData.email,
+      mobile:participantData.mobile,
+      whatsapp:participantData.whatsapp,
+      profession:participantData.profession,
+      institution:participantData.institution||null,
+      present_address:participantData.present_address,
+      district:participantData.district,
+      division:participantData.division,
+      country:participantData.country||"Bangladesh",
+      facebook_url:participantData.facebook_url||null,
+      preferred_contact:participantData.preferred_contact||"WhatsApp",
+      interested_topic:participantData.interested_topic,
+      join_reason:participantData.join_reason||null,
+      referral_source:participantData.referral_source||null,
+      payment_method:selectedMethod,
+      transaction_id:paymentData.transaction_id,
+      payment_mobile:paymentData.payment_mobile||null,
+      amount_paid:Number(paymentData.amount_paid||0),
+      currency:selectedMethod==="Redot Pay"?"USD":"BDT",
+      payment_date:paymentData.payment_date,
+      payment_time:paymentData.payment_time,
+      receipt_path:receiptPath,
+      promo_code:new Date()<=OFFER_END?"lexbdhouston":null,
+      payment_status:"Pending Verification",
+      registration_status:"Pending Verification"
+    };
+    const {error}=await sb.from("houston_registrations").insert(row);
+    if(error)throw error;
+    activeRegistrationId=registrationId;
+    document.getElementById("registration-id").textContent=registrationId;
+    await new Promise(r=>setTimeout(r,900));
+    show("complete");
+  }catch(err){
+    console.error(err);alert("Submission failed: "+(err?.message||"Please try again."));show("verify");
+  }finally{btn.disabled=false}
+});
+applyCampaignState();renderPayment();setDateTimeDefaults();
