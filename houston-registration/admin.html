@@ -2,48 +2,36 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LexGlobal BD | Houston Admin</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./config.js"></script>
+<title>LexGlobal BD | Premium Admin Console</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./config.js"></script>
 <style>
-*{box-sizing:border-box}:root{--g:#0a8f55;--d:#062d27;--m:#68746e;--l:#dfe8e3}
-body{margin:0;background:#edf3f0;color:#16221e;font-family:Arial,Helvetica,sans-serif}
-.wrap{max-width:1200px;margin:auto;padding:16px}header{background:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 7px 22px rgba(20,55,40,.07)}
-.brand{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:50%;background:#082d61;border:2px solid #d8b24f;color:#ffdc78;display:grid;place-items:center;font-size:23px}
-.brand b,.brand small{display:block}.brand small{color:var(--m)}button{border:0;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer}.green{background:var(--g);color:#fff}.light{background:#edf2ef;color:#1d3029}
-.login{max-width:420px;margin:70px auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 8px 28px rgba(20,55,40,.08)}label{display:block;font-size:12px;font-weight:700;margin:10px 0}input,select{width:100%;padding:11px;border:1px solid #d7dfdb;border-radius:8px;margin-top:5px}
-.hidden{display:none!important}.error{color:#bd3030;font-size:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}.stat{background:#fff;border-radius:13px;padding:16px}.stat small{display:block;color:var(--m)}.stat b{font-size:25px}
-.toolbar{background:#fff;border-radius:12px;padding:12px;display:grid;grid-template-columns:2fr 1fr auto auto;gap:8px}.toolbar input,.toolbar select{margin:0}
-.table{background:#fff;border-radius:14px;overflow:auto;margin-top:12px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:11px;border-bottom:1px solid #edf1ef;text-align:left;vertical-align:top}.badge{display:inline-block;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800}.pending{background:#fff3ce;color:#806000}.verified{background:#dff5e8;color:#087846}.confirmed{background:#e1edff;color:#265998}.rejected{background:#ffe2e2;color:#a62b2b}
-dialog{width:min(760px,94vw);border:0;border-radius:16px;padding:18px}dialog::backdrop{background:rgba(0,0,0,.45)}.dh{display:flex;justify-content:space-between;align-items:center}.dh button{background:none;font-size:23px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid div{background:#f5f8f6;padding:10px;border-radius:8px}.grid small{display:block;color:var(--m)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}a{color:#087e4a;font-weight:700}
-@media(max-width:760px){.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+*{box-sizing:border-box}:root{--bg:#07111c;--panel:#0d1c2a;--panel2:#102536;--gold:#d7ad48;--gold2:#f5d77b;--green:#16a66f;--text:#eef5f8;--muted:#8fa5b3;--line:rgba(255,255,255,.08);--danger:#e55f65}
+body{margin:0;background:radial-gradient(circle at 90% 0,#12374a 0,transparent 28%),linear-gradient(180deg,#07111c,#091621);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;min-height:100vh}
+button,input,select{font:inherit}.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}.sidebar{border-right:1px solid var(--line);padding:22px 18px;background:rgba(5,14,23,.72);backdrop-filter:blur(16px);position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--gold);background:#092a55;color:var(--gold2);font-size:22px}.brand b{font-size:18px}.brand small{display:block;color:var(--muted)}
+.nav{margin-top:30px;display:grid;gap:8px}.nav a{color:#c8d5dc;text-decoration:none;padding:11px 12px;border-radius:12px}.nav a.active{background:linear-gradient(135deg,rgba(215,173,72,.17),rgba(255,255,255,.05));color:#fff;border:1px solid rgba(215,173,72,.22)}
+.main{padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.top h1{font-size:28px;margin:0}.top p{color:var(--muted);margin:4px 0 0}.logout{border:1px solid var(--line);background:#112334;color:#fff;border-radius:12px;padding:10px 14px;font-weight:800}
+.loginwrap{grid-column:1/-1;display:grid;place-items:center;min-height:100vh;padding:20px}.login{width:min(440px,100%);background:linear-gradient(180deg,#102536,#0d1c2a);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:0 28px 80px rgba(0,0,0,.35)}.login h2{font-size:30px;margin:0 0 8px}.login p{color:var(--muted)}
+label{display:block;font-size:12px;font-weight:800;margin:14px 0 0}input,select{width:100%;margin-top:7px;padding:12px 13px;border-radius:12px;border:1px solid var(--line);background:#0a1723;color:#fff;outline:none}input:focus,select:focus{border-color:#2e9f86;box-shadow:0 0 0 3px rgba(46,159,134,.12)}
+.sign{width:100%;margin-top:16px;border:0;border-radius:12px;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));font-weight:900;color:#18232c}
+.hidden{display:none!important}.error{color:#ff969b;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.stat{background:linear-gradient(180deg,#0f2232,#0c1a27);border:1px solid var(--line);border-radius:18px;padding:16px;position:relative;overflow:hidden}.stat:after{content:"";position:absolute;width:70px;height:70px;border-radius:50%;right:-25px;top:-25px;background:rgba(215,173,72,.08)}.stat small{color:var(--muted);display:block}.stat b{font-size:28px;display:block;margin-top:8px}
+.toolbar{margin-top:14px;background:#0c1a27;border:1px solid var(--line);padding:12px;border-radius:16px;display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px}.toolbar input,.toolbar select{margin:0}.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:850}.btn.green{background:#119969;color:#fff}.btn.soft{background:#13283a;color:#d9e6ec;border:1px solid var(--line)}
+.tablewrap{margin-top:14px;background:#0c1a27;border:1px solid var(--line);border-radius:18px;overflow:auto}.tablehead{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.tablehead span{color:var(--muted);font-size:12px}table{width:100%;border-collapse:collapse;min-width:1040px;font-size:12px}th,td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{color:#9eb0bb;font-size:11px;text-transform:uppercase;letter-spacing:.05em}tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:900}.pending{background:#5b4819;color:#ffd66d}.verified{background:#103c2c;color:#68e2ac}.confirmed{background:#153251;color:#83b7ff}.rejected{background:#4a2227;color:#ff9ea3}
+.view{border:1px solid var(--line);background:#122638;color:#fff;border-radius:9px;padding:7px 10px}
+dialog{width:min(900px,94vw);border:1px solid var(--line);border-radius:20px;background:#0c1a27;color:#fff;padding:0;box-shadow:0 30px 100px rgba(0,0,0,.6)}dialog::backdrop{background:rgba(0,0,0,.65)}.dh{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}.dh h2{margin:0}.dh button{border:0;background:none;color:#fff;font-size:24px}.details{padding:18px 20px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.field{background:#102536;border:1px solid var(--line);padding:12px;border-radius:12px}.field small{display:block;color:var(--muted);margin-bottom:4px}.field b{word-break:break-word}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.actions .danger{background:#4a2227;color:#ffb4b8}.actions .gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#18232c}.actions .green{background:#119969;color:#fff}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}.nav{display:flex;overflow:auto}.stats{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.stats,.grid{grid-template-columns:1fr}.main{padding:15px}.sidebar{padding:15px}}
 </style>
-</head>
-<body>
-<div class="wrap">
-<header><div class="brand"><div class="logo">⚖</div><div><b>LexGlobal BD</b><small>Houston Registration Admin</small></div></div><button id="logout" class="light hidden">Log out</button></header>
+</head><body>
+<section id="login" class="loginwrap"><div class="login"><div class="brand"><div class="logo">⚖</div><div><b>LexGlobal BD</b><small>Premium Admin Console</small></div></div><h2>Admin Login</h2><p>Secure access for approved LexGlobal BD administrators.</p><form id="loginForm"><label>Email<input required type="email" name="email"></label><label>Password<input required type="password" name="password"></label><button class="sign">Sign in securely</button></form><p id="msg" class="error"></p></div></section>
 
-<section id="login" class="login">
-<h2>Admin Login</h2><p>Only approved LexGlobal BD admin accounts can access registration data.</p>
-<form id="loginForm"><label>Email<input required type="email" name="email"></label><label>Password<input required type="password" name="password"></label><button class="green" type="submit">Sign in</button></form><p id="msg" class="error"></p>
-</section>
-
-<section id="dash" class="hidden">
-<div class="stats">
-<div class="stat"><small>Total Registrations</small><b id="total">0</b></div>
-<div class="stat"><small>Payment Verified</small><b id="verified">0</b></div>
-<div class="stat"><small>Pending</small><b id="pending">0</b></div>
-<div class="stat"><small>BDT Revenue</small><b id="bdt">৳0</b></div>
-<div class="stat"><small>USD Revenue</small><b id="usd">$0</b></div>
-</div>
-<div class="toolbar">
-<input id="search" placeholder="Search name, phone, email, transaction ID">
-<select id="status"><option value="">All statuses</option><option>Pending Verification</option><option>Payment Verified</option><option>Registration Confirmed</option><option>Payment Rejected</option></select>
-<button id="refresh" class="light">Refresh</button><button id="csv" class="green">Export CSV</button>
-</div>
-<div class="table"><table><thead><tr><th>ID</th><th>Participant</th><th>Contact</th><th>Profession</th><th>Payment</th><th>Status</th><th>Submitted</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
-</section>
-</div>
-<dialog id="dlg"><div class="dh"><h2>Registration Details</h2><button id="close">×</button></div><div id="details"></div></dialog>
-<script src="./admin.js"></script>
-</body></html>
+<div id="dash" class="app hidden">
+<aside class="sidebar"><div class="brand"><div class="logo">⚖</div><div><b>LexGlobal BD</b><small>Houston Registration</small></div></div><nav class="nav"><a class="active" href="#">Dashboard</a><a href="#registrations">Registrations</a><a href="#payments">Payments</a><a href="./index.html" target="_blank">Open Registration Site ↗</a></nav></aside>
+<main class="main"><div class="top"><div><h1>Registration Dashboard</h1><p>Monitor participants, payment verification and registration status.</p></div><button id="logout" class="logout">Log out</button></div>
+<div class="stats"><div class="stat"><small>Total Registrations</small><b id="total">0</b></div><div class="stat"><small>Payment Verified</small><b id="verified">0</b></div><div class="stat"><small>Pending Review</small><b id="pending">0</b></div><div class="stat"><small>BDT Revenue</small><b id="bdt">৳0</b></div><div class="stat"><small>USD Revenue</small><b id="usd">$0</b></div></div>
+<div class="toolbar" id="registrations"><input id="search" placeholder="Search name, phone, email, transaction ID, topic"><select id="status"><option value="">All statuses</option><option>Pending Verification</option><option>Payment Verified</option><option>Registration Confirmed</option><option>Payment Rejected</option></select><button id="refresh" class="btn soft">Refresh</button><button id="csv" class="btn green">Export CSV</button></div>
+<div class="tablewrap"><div class="tablehead"><b>Participant Registrations</b><span>Click View to inspect full details</span></div><table><thead><tr><th>ID</th><th>Participant</th><th>Contact</th><th>Age</th><th>Profession</th><th>Interested Topic</th><th>Payment</th><th>Status</th><th>Submitted</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+</main></div>
+<dialog id="dlg"><div class="dh"><h2>Registration Details</h2><button id="close">×</button></div><div class="details" id="details"></div></dialog>
+<script src="./admin.js"></script></body></html>
