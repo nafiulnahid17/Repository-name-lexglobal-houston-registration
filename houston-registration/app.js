@@ -16,7 +16,7 @@ function currentFee(){return new Date()<=OFFER_END?299:499}
 function registrationOpen(){return new Date()<=REG_END}
 
 function show(name){
-  if((name==="complete"||name==="community")&&!submitted)return;
+  if(name==="community"&&!submitted)return;
   const target=document.getElementById("screen-"+name);
   if(!target)return;
   if(name==="payment") {applyCampaignState();renderPayment();}
@@ -39,15 +39,6 @@ function makeRegistrationId(){
   return "LGUH-"+y+m+day+"-"+crypto.randomUUID().slice(0,8).toUpperCase();
 }
 
-function setDateTimeDefaults(){
-  const n=new Date();
-  const date=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
-  const time=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");
-  const d=document.getElementById("payment-date"),t=document.getElementById("payment-time");
-  if(d&&!d.value)d.value=date;
-  if(t&&!t.value)t.value=time;
-}
-
 function applyCampaignState(){
   const fee=currentFee();
   document.getElementById("offerFee").textContent="৳"+fee;
@@ -65,31 +56,36 @@ function applyCampaignState(){
 
 function copyButton(value){return ' <button type="button" class="copy-btn" data-copy="'+value+'">Copy</button>'}
 
-function renderPayment(){
-  const fee=currentFee();
-  document.querySelectorAll(".pay-card").forEach(b=>b.classList.toggle("active",b.dataset.method===selectedMethod));
-  document.querySelectorAll(".pay-card").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.method===selectedMethod)));
-  const box=document.getElementById("pay-detail");
-  const mf=document.getElementById("method-field");
-  const mw=document.getElementById("payment-mobile-wrap");
-  const mi=document.getElementById("payment-mobile");
-  const amount=document.getElementById("amount-paid");
-  if(!box||!mf||!mw||!mi||!amount)return;
-  mf.value=selectedMethod;
+const paymentMethods={
+  "bKash":{logo:"bkash.png",label:"bKash",instruction:"Send Money করতে হবে — Payment নয়।",destinationLabel:"bKash Number",number:"01885603359",mobile:true},
+  "Nagad":{logo:"nagad.png",label:"Nagad",instruction:"Send Money করতে হবে — Payment নয়।",destinationLabel:"Nagad Number",number:"01303498506",mobile:true},
+  "Bank Transfer":{logo:"brac-bank.jpg",label:"BRAC Bank Transfer",instruction:"নিচের ব্যাংক অ্যাকাউন্টে টাকা ট্রান্সফার করুন।",destinationLabel:"Account Number",number:"1073658180001",mobile:false},
+  "Redot Pay":{logo:"redot-pay.jpg",label:"Redot Pay",instruction:"Send Money — নিচের Pay ID-তে পাঠান।",destinationLabel:"Redot Pay ID",number:"1164960686",mobile:false}
+};
 
-  if(selectedMethod==="bKash"){
-    box.innerHTML='<b>bKash Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01885603359 '+copyButton("01885603359")+'</b><span>Amount</span><b>৳'+fee+'</b></div><div class="notice">Please send the exact amount and provide the Transaction ID in the next step.</div>';
-    mw.style.display="block";mi.required=true;amount.value=String(fee);
-  }else if(selectedMethod==="Nagad"){
-    box.innerHTML='<b>Nagad Payment Details</b><div class="kv"><span>Payment Method</span><b>Send Money</b><span>Number</span><b>01303498506 '+copyButton("01303498506")+'</b><span>Amount</span><b>৳'+fee+'</b></div><div class="notice">Please send the exact amount and provide the Transaction ID in the next step.</div>';
-    mw.style.display="block";mi.required=true;amount.value=String(fee);
-  }else if(selectedMethod==="Bank Transfer"){
-    box.innerHTML='<b>Bank Transfer Details</b><div class="kv"><span>Bank</span><b>BRAC Bank PLC</b><span>Account Name</span><b>MD. NAHID ALOM</b><span>Account Number</span><b>1073658180001 '+copyButton("1073658180001")+'</b><span>Branch</span><b>RAJSHAHI BRANCH</b><span>Routing</span><b>060811934</b><span>SWIFT</span><b>BRAKBDDH</b><span>Amount</span><b>৳'+fee+'</b></div>';
-    mw.style.display="none";mi.required=false;mi.value="";amount.value=String(fee);
-  }else{
-    box.innerHTML='<b>Redot Pay Details</b><div class="kv"><span>Pay ID</span><b>1164960686 '+copyButton("1164960686")+'</b><span>Amount</span><b>USD 2.50</b></div>';
-    mw.style.display="none";mi.required=false;mi.value="";amount.value="2.50";
-  }
+function renderPayment(){
+  const method=paymentMethods[selectedMethod];
+  if(!method)return;
+  const fee=currentFee();
+  const redot=selectedMethod==="Redot Pay";
+  const displayAmount=redot?"USD 2.50":"৳"+fee;
+  document.querySelectorAll(".pay-card").forEach(b=>{
+    b.classList.toggle("active",b.dataset.method===selectedMethod);
+    b.setAttribute("aria-pressed",String(b.dataset.method===selectedMethod));
+  });
+  document.getElementById("method-field").value=selectedMethod;
+  const mobile=document.getElementById("payment-mobile");
+  document.getElementById("payment-mobile-wrap").style.display=method.mobile?"block":"none";
+  mobile.required=method.mobile;
+  if(!method.mobile)mobile.value="";
+  document.getElementById("amount-paid").value=redot?"2.50":String(fee);
+  const bankDetails=selectedMethod==="Bank Transfer"?'<div class="bank-metadata"><p><b>Account Name:</b> MD. NAHID ALOM</p><p><b>Bank:</b> BRAC Bank PLC</p><p><b>Branch:</b> RAJSHAHI BRANCH</p><p><b>Routing:</b> 060811934 · <b>SWIFT:</b> BRAKBDDH</p></div>':"";
+  document.getElementById("pay-detail").innerHTML=
+    '<div class="payment-detail-heading"><img src="./assets/'+method.logo+'" alt=""><strong>'+method.label+'</strong></div>'+
+    '<p class="payment-instruction">'+method.instruction+'</p>'+
+    '<div class="payment-destination"><span>'+method.destinationLabel+'</span><div class="payment-number-row"><strong>'+method.number+'</strong>'+copyButton(method.number)+'</div></div>'+
+    '<div class="payment-total"><span>Amount to Send</span><strong>'+displayAmount+'</strong></div>'+bankDetails+
+    '<div class="notice">টাকা পাঠানোর পরে <b>I Have Paid</b> চাপুন এবং পরের ধাপে Transaction ID দিন।</div>';
 }
 
 document.addEventListener("click",async e=>{
@@ -101,7 +97,7 @@ document.addEventListener("click",async e=>{
       alert("Registration deadline has ended.");
       return;
     }
-    if(next==="verify"){applyCampaignState();renderPayment();setDateTimeDefaults();}
+    if(next==="verify"){applyCampaignState();renderPayment();}
     show(next);
     return;
   }
@@ -189,8 +185,8 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
       payment_mobile:paymentData.payment_mobile||null,
       amount_paid:Number(paymentData.amount_paid||0),
       currency:selectedMethod==="Redot Pay"?"USD":"BDT",
-      payment_date:paymentData.payment_date,
-      payment_time:paymentData.payment_time,
+      payment_date:null,
+      payment_time:null,
       receipt_path:receiptPath,
       promo_code:new Date()<=OFFER_END?"lexbdhouston":null,
       payment_status:"Pending Verification",
@@ -203,7 +199,7 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
 
     document.getElementById("registration-id").textContent=registrationId;
 
-    show("complete");
+    show("community");
   }catch(err){
     console.error(err);
     alert("Submission failed: "+(err?.message||"Please try again."));
@@ -219,4 +215,4 @@ document.getElementById("upload-area")?.addEventListener("keydown",e=>{if(e.key=
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)applyCampaignState();});
 applyCampaignState();
 renderPayment();
-setDateTimeDefaults();
+

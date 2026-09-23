@@ -166,6 +166,29 @@ h2{font-size:25px;line-height:1.2;margin-bottom:8px}.muted{font-size:15px;line-h
 @media(max-width:380px){.landing-inner,.card,.program-page{padding-left:18px;padding-right:18px}.hero-title{font-size:35px}.logo-safe-space{height:170px}.two-col{grid-template-columns:1fr}.step{width:45px}.actions .btn,.program-actions .btn{font-size:14px}.program-head{flex-wrap:wrap}.event-card b{font-size:14px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.spinner{animation:none}}
 
+
+/* Supplied payment brands and a single selected-method instruction panel. */
+.pay-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px 10px;color:var(--ink)!important}
+.payment-logo{display:block;width:120px;height:76px;max-width:100%;object-fit:contain;border-radius:5px}
+.pay-card[data-method="bKash"] .payment-logo{width:76px}
+.pay-card[data-method="Bank Transfer"] .payment-logo{width:76px}
+#pay-detail{margin:0 0 20px;background:linear-gradient(135deg,#eefaf3,#e0f4e9);border:2px solid #0a9959;border-radius:12px;padding:20px;box-shadow:0 5px 18px rgba(5,112,61,.08)}
+.payment-detail-heading{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:18px;line-height:1.3}
+.payment-detail-heading img{width:64px;height:48px;object-fit:contain;border-radius:5px;background:#fff}
+.payment-instruction{font-size:15px;margin:0 0 16px;color:#075b36;font-weight:700}
+.payment-destination{background:#fff;border:1px solid #b9dfc8;padding:14px;border-radius:8px}
+.payment-destination>span{display:block;font-size:13px;color:#52665a;margin-bottom:6px}
+.payment-number-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.payment-number-row strong{font-size:23px;letter-spacing:.4px;overflow-wrap:anywhere}
+.payment-number-row .copy-btn{font-size:14px;min-height:42px;padding:10px 14px;background:#087c47;color:#fff}
+.payment-total{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;font-size:16px}
+.payment-total strong{font-size:28px;color:#087c47}
+#pay-detail .notice{background:rgba(255,255,255,.72);border-color:#c6e5d3;font-size:14px;margin-top:14px;padding:12px}
+.bank-metadata{margin-top:14px;font-size:14px;display:grid;gap:5px}.bank-metadata p{margin:0}
+.submission-confirmation{background:#fff;color:#154e34;padding:15px 20px;text-align:center;border-bottom:1px solid #b9dfc8;font-size:14px}
+.submission-confirmation>strong,.submission-confirmation>span{display:block}.submission-confirmation>strong{font-size:17px}
+.community-visual{position:relative}.community-link{top:77%}
+
 </style>
 </head>
 <body>
@@ -287,10 +310,11 @@ h2{font-size:25px;line-height:1.2;margin-bottom:8px}.muted{font-size:15px;line-h
     <div class="top-logo"><img src="./assets/lexglobal-logo.webp" alt="LexGlobal BD" width="310" height="103"></div>
     <div class="progress"><div class="step done"><b>1</b><span>Details</span></div><i class="done"></i><div class="step done"><b>2</b><span>Support</span></div><i class="done"></i><div class="step active"><b>3</b><span>Payment</span></div><i></i><div class="step"><b>4</b><span>Verify</span></div><i></i><div class="step"><b>5</b><span>Complete</span></div></div>
     <h2>Payment</h2><p class="muted">Complete the payment to continue your registration.</p>
+    <div id="pay-detail" class="pay-detail" aria-live="polite" aria-atomic="true"></div>
     <div class="offer"><div><span>Regular Fee: <s>৳499</s></span><strong>Current Fee: <em id="offerFee">৳299</em></strong></div><div class="promo" id="promoOffer">Promo Code: <b>lexbdhouston</b></div><small><span id="offerStatus">Offer valid through 27 September 2026.</span> Final Registration Deadline: 4 October 2026.</small></div>
     <h3 style="font-size:13px">Select Payment Method *</h3>
-    <div class="pay-grid"><button type="button" class="pay-card active" data-method="bKash">bKash</button><button type="button" class="pay-card" data-method="Nagad">Nagad</button><button type="button" class="pay-card" data-method="Bank Transfer">🏦 Bank Transfer</button><button type="button" class="pay-card" data-method="Redot Pay">🔴 Redot Pay</button></div>
-    <div id="pay-detail" class="pay-detail"></div>
+    <div class="pay-grid"><button type="button" class="pay-card active" data-method="bKash"><img class="payment-logo" src="./assets/bkash.png" alt="" width="120" height="76"><span>bKash</span></button><button type="button" class="pay-card" data-method="Nagad"><img class="payment-logo" src="./assets/nagad.png" alt="" width="120" height="76"><span>Nagad</span></button><button type="button" class="pay-card" data-method="Bank Transfer"><img class="payment-logo" src="./assets/brac-bank.jpg" alt="" width="120" height="76"><span>Bank Transfer</span></button><button type="button" class="pay-card" data-method="Redot Pay"><img class="payment-logo" src="./assets/redot-pay.jpg" alt="" width="120" height="76"><span>Redot Pay</span></button></div>
+    
     <div class="actions"><button class="btn btn-secondary" data-next="support">← Back</button><button class="btn btn-primary" data-next="verify">I Have Paid →</button></div>
   </div>
 </section>
@@ -305,7 +329,6 @@ h2{font-size:25px;line-height:1.2;margin-bottom:8px}.muted{font-size:15px;line-h
       <label>Transaction ID / Payment Reference *<input required name="transaction_id" placeholder="Enter transaction ID / reference"></label>
       <label id="payment-mobile-wrap">Payment Mobile Number *<input id="payment-mobile" name="payment_mobile" placeholder="Number used for payment"></label>
       <label>Amount Paid *<input id="amount-paid" type="number" min="0.01" step="0.01" name="amount_paid" value="299" required></label>
-      <div class="two-col"><label>Payment Date *<input id="payment-date" name="payment_date" type="date" required></label><label>Payment Time *<input id="payment-time" name="payment_time" type="time" required></label></div>
       <label>Payment Screenshot / Receipt (Optional)<div id="upload-area" role="button" tabindex="0" class="upload-zone">☁ Tap to upload receipt<div class="file-note">PNG, JPG or PDF • Max 5MB</div></div><input id="receipt" type="file" accept="image/png,image/jpeg,application/pdf" hidden></label>
       <label class="check"><input type="checkbox" required> I confirm that the payment information provided above is correct.</label>
       <div class="actions"><button type="button" class="btn btn-secondary" data-next="payment">← Back</button><button id="submitRegistration" class="btn btn-primary" type="submit">Submit Registration</button></div>
@@ -315,14 +338,13 @@ h2{font-size:25px;line-height:1.2;margin-bottom:8px}.muted{font-size:15px;line-h
 
 <section id="screen-processing" class="screen page" hidden inert><div class="card center"><div class="top-logo"><img src="./assets/lexglobal-logo.webp" alt="LexGlobal BD" width="310" height="103"></div><div class="progress"><div class="step done"><b>1</b><span>Details</span></div><i class="done"></i><div class="step done"><b>2</b><span>Support</span></div><i class="done"></i><div class="step done"><b>3</b><span>Payment</span></div><i class="done"></i><div class="step done"><b>4</b><span>Verify</span></div><i class="done"></i><div class="step active"><b>5</b><span>Complete</span></div></div><div class="spinner"></div><h2>Submitting Your Registration</h2><p class="muted">Please wait while we confirm your information.</p><div class="process-list" role="status">Saving your participant and payment information securely. Payment verification follows submission.</div><div class="notice">This may take a few seconds. Please do not close this page.</div></div></section>
 
-<section id="screen-complete" class="screen page" hidden inert><div class="card center"><div class="top-logo"><img src="./assets/lexglobal-logo.webp" alt="LexGlobal BD" width="310" height="103"></div><div class="progress"><div class="step done"><b>1</b><span>Details</span></div><i class="done"></i><div class="step done"><b>2</b><span>Support</span></div><i class="done"></i><div class="step done"><b>3</b><span>Payment</span></div><i class="done"></i><div class="step done"><b>4</b><span>Verify</span></div><i class="done"></i><div class="step done"><b>5</b><span>Complete</span></div></div><div class="success-icon">✓</div><h2>Registration Submitted Successfully!</h2><p>Thank you for registering for <b>AI, Law, and the Legal Profession</b>.</p><p class="muted">LexGlobal BD will verify your payment and confirm the next participant-support steps.</p><div id="registration-id" class="regid">LGUH-...</div><div class="notice">Program updates, reminders and joining guidance will be shared through the participant community.</div><button class="btn btn-primary btn-full" data-next="community">Continue to WhatsApp Community →</button></div></section>
-
 <section id="screen-community" class="screen community" hidden inert aria-label="WhatsApp participant community">
-<img class="community-art" src="./assets/community.webp" alt="Join our WhatsApp community for program updates, announcements, joining guidance and participant support." width="941" height="1672">
-<a class="community-link" href="https://chat.whatsapp.com/HaNnQfi3PbZ0zgtFDhwXe4" target="_blank" rel="noopener" aria-label="Join the WhatsApp Community"></a>
+<div class="submission-confirmation" role="status"><strong>Registration submitted</strong><span>Payment verification pending · <span id="registration-id"></span></span></div>
+<div class="community-visual"><img class="community-art" src="./assets/community.webp" alt="Join our WhatsApp community for program updates, announcements, joining guidance and participant support." width="941" height="1672">
+<a class="community-link" href="https://chat.whatsapp.com/HaNnQfi3PbZ0zgtFDhwXe4" target="_blank" rel="noopener" aria-label="Join the WhatsApp Community"></a></div>
 </section>
 
 </main>
-<script src="./app.js?v=20260923-3"></script>
+<script src="./app.js?v=20260923-4"></script>
 </body>
 </html>
