@@ -1,9 +1,14 @@
 const cfg=window.LEXGLOBAL_CONFIG||{};
 const configured=cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY&&!cfg.SUPABASE_URL.includes("PASTE_")&&!cfg.SUPABASE_ANON_KEY.includes("PASTE_");
-const sb=configured?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;
+const sb=configured&&window.supabase?window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;
 
 let selectedMethod="bKash";
 let participantData={};
+let submitted=false;
+let submitting=false;
+let registrationId=null;
+let uploadedReceiptPath=null;
+let uploadedReceiptFile=null;
 const OFFER_END=new Date("2026-09-27T23:59:59+06:00");
 const REG_END=new Date("2026-10-04T23:59:59+06:00");
 
@@ -11,23 +16,19 @@ function currentFee(){return new Date()<=OFFER_END?299:499}
 function registrationOpen(){return new Date()<=REG_END}
 
 function show(name){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  if((name==="complete"||name==="community")&&!submitted)return;
   const target=document.getElementById("screen-"+name);
-  if(target)target.classList.add("active");
+  if(!target)return;
+  if(name==="payment") {applyCampaignState();renderPayment();}
+  document.querySelectorAll(".screen").forEach(screen=>{
+    const active=screen===target;
+    screen.classList.toggle("active",active);
+    screen.hidden=!active;
+    screen.inert=!active;
+  });
   window.scrollTo({top:0,behavior:"instant"});
-}
-
-async function loadHomeBackground(){
-  try{
-    const parts=await Promise.all([0,1,2].map(i=>
-      fetch("./assets/home-bg-v2/part"+String(i).padStart(2,"0")+".txt",{cache:"force-cache"}).then(r=>{
-        if(!r.ok)throw new Error("Background asset failed");
-        return r.text();
-      })
-    ));
-    const uri='url("data:image/webp;base64,'+parts.join("").trim()+'")';
-    document.documentElement.style.setProperty("--houston-bg",uri);
-  }catch(err){console.warn("Houston background could not be loaded",err)}
+  const heading=target.querySelector("h1,h2,.program-title");
+  if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}
 }
 
 function makeRegistrationId(){
@@ -35,7 +36,7 @@ function makeRegistrationId(){
   const y=String(d.getFullYear()).slice(-2);
   const m=String(d.getMonth()+1).padStart(2,"0");
   const day=String(d.getDate()).padStart(2,"0");
-  return "LGUH-"+y+m+day+"-"+Math.floor(10000+Math.random()*90000);
+  return "LGUH-"+y+m+day+"-"+crypto.randomUUID().slice(0,8).toUpperCase();
 }
 
 function setDateTimeDefaults(){
@@ -51,6 +52,9 @@ function applyCampaignState(){
   const fee=currentFee();
   document.getElementById("offerFee").textContent="৳"+fee;
   document.getElementById("programFee").textContent="৳"+fee;
+  document.getElementById("promoOffer").hidden=new Date()>OFFER_END;
+  document.getElementById("offerStatus").textContent=new Date()<=OFFER_END?"Offer valid through 27 September 2026.":"Special offer ended. Regular support fee applies.";
+  document.querySelector(".fee-row s").hidden=new Date()>OFFER_END;
   if(!registrationOpen()){
     ["landingStart","programStart","submitRegistration"].forEach(id=>{
       const b=document.getElementById(id);
@@ -64,6 +68,7 @@ function copyButton(value){return ' <button type="button" class="copy-btn" data-
 function renderPayment(){
   const fee=currentFee();
   document.querySelectorAll(".pay-card").forEach(b=>b.classList.toggle("active",b.dataset.method===selectedMethod));
+  document.querySelectorAll(".pay-card").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.method===selectedMethod)));
   const box=document.getElementById("pay-detail");
   const mf=document.getElementById("method-field");
   const mw=document.getElementById("payment-mobile-wrap");
@@ -96,7 +101,7 @@ document.addEventListener("click",async e=>{
       alert("Registration deadline has ended.");
       return;
     }
-    if(next==="verify")setDateTimeDefaults();
+    if(next==="verify"){applyCampaignState();renderPayment();setDateTimeDefaults();}
     show(next);
     return;
   }
@@ -114,7 +119,7 @@ document.addEventListener("click",async e=>{
       await navigator.clipboard.writeText(cp.dataset.copy);
       const old=cp.textContent;cp.textContent="Copied";
       setTimeout(()=>cp.textContent=old,1000);
-    }catch{}
+    }catch{prompt("Copy this payment number:",cp.dataset.copy)}
   }
 });
 
@@ -136,7 +141,10 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
   e.preventDefault();
   if(!e.target.reportValidity())return;
   if(!registrationOpen()){alert("Registration deadline has ended.");return}
-  if(!configured){alert("Database is not connected. Please check config.js.");return}
+  if(!sb){alert("The secure registration connection is unavailable. Please refresh and try again.");return}
+  if(submitting||submitted)return;
+  if(!participantData.full_name){show("details");return;}
+  submitting=true;
 
   const btn=document.getElementById("submitRegistration");
   btn.disabled=true;
@@ -144,16 +152,18 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
 
   try{
     const paymentData=Object.fromEntries(new FormData(e.target).entries());
-    const registrationId=makeRegistrationId();
+    registrationId=registrationId||makeRegistrationId();
     const receipt=receiptInput?.files?.[0]||null;
-    let receiptPath=null;
+    let receiptPath=uploadedReceiptPath;
 
-    if(receipt){
+    if(receipt && receipt!==uploadedReceiptFile){
+      if(!["image/png","image/jpeg","application/pdf"].includes(receipt.type))throw new Error("Please upload a PNG, JPG or PDF receipt.");
       if(receipt.size>5*1024*1024)throw new Error("Payment screenshot must be 5MB or smaller.");
       const ext=(receipt.name.split(".").pop()||"bin").toLowerCase();
       receiptPath=registrationId+"/"+crypto.randomUUID()+"."+ext;
       const {error:upErr}=await sb.storage.from("payment-receipts").upload(receiptPath,receipt,{upsert:false});
       if(upErr)throw upErr;
+      uploadedReceiptPath=receiptPath;uploadedReceiptFile=receipt;
     }
 
     const row={
@@ -189,9 +199,10 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
 
     const {error}=await sb.from("houston_registrations").insert(row);
     if(error)throw error;
+    submitted=true;
 
     document.getElementById("registration-id").textContent=registrationId;
-    await new Promise(r=>setTimeout(r,900));
+
     show("complete");
   }catch(err){
     console.error(err);
@@ -199,10 +210,13 @@ document.getElementById("payment-form")?.addEventListener("submit",async e=>{
     show("verify");
   }finally{
     btn.disabled=false;
+    submitting=false;
   }
 });
 
-loadHomeBackground();
+show("landing");
+document.getElementById("upload-area")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();receiptInput.click();}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)applyCampaignState();});
 applyCampaignState();
 renderPayment();
 setDateTimeDefaults();
